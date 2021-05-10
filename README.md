@@ -7,5 +7,8 @@ Check list :
 - Tenter CNN voir articles imprimés
 - tenter RNN pcq architecture typique pour séquences texte
 - Classifier par famille pcq binaire class caca 
+- rajouter testing loop avec classic 70/30 train-test method 
 
+
+MOINS IMPORTANT
 - Arriver à lire les figures sur overleaf
