@@ -81,7 +81,13 @@ def get_freq(df):
 
 
 if __name__ == '__main__':
+    # Debug
     disp = False
+
+    # Device configuration
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    if disp:
+        print('The device used is : ' + str(device))
 
     # Loading the data
     Proteins = load_data()
@@ -92,6 +98,16 @@ if __name__ == '__main__':
     N = 200
     split = split_data(Proteins, N)
 
+    # How to fromat the data ?
+    X_train, Y_train = get_freq(split)
+
+    # Hyper-parameters
+    input_size = X_train.shape[1]
+    output_size = 1
+    hidden_size = 50
+    learning_rate = 0.01
+    epochs = 100
+
     # Longest sequence in sample
     if disp:
         print('longest sequence is :' + str(split[1].str.len().max()))
@@ -100,32 +116,38 @@ if __name__ == '__main__':
     # Second attempt neural net wit frequencies of aa
     # -------------------------------------------------
 
-    X_train, Y_train = get_freq(split)
-
-    net = NeuralNet(X_train.shape[1], 50, 1)
+    net = NeuralNet(input_size, hidden_size, output_size)
 
     # Defining the optimizer
-    optimizer = optim.Adam(net.parameters(), lr=.01)
+    optimizer = optim.Adam(net.parameters(), lr=learning_rate)
 
-    train_loss = []  # where we keep track of the loss
-    train_accuracy = []  # where we keep track of the accuracy of the model
-    epoch = 100  # number of training iterations
+    train_loss = []
+    train_accuracy = []
 
     # TRAINING LOOP
-    for i in range(epoch):
+    for epoch in range(epochs):
         X_train_t = torch.FloatTensor(X_train)
-        y_hat = net(X_train_t)  # forward pass
 
-        loss = loss_func(y_hat, Y_train)  # compute the loss
-        loss.backward()  # obtain the gradients with respect to the loss
-        optimizer.step()  # perform one step of gradient descent
-        optimizer.zero_grad()  # reset the gradients to 0
+        # Forward pass
+        y_hat = net(X_train_t)
 
-        y_hat_class = np.where(y_hat.detach().numpy() < 0.5, 0,
-                               1)  # we assign an appropriate label based on the network's prediction
+        # Computing the loss function
+        loss = loss_func(y_hat, Y_train)
 
-        output = [a == p for a, p in zip(Y_train, y_hat_class) if p == 1]
-        accuracy = np.sum(Y_train.detach().numpy() == y_hat_class) / len(Y_train)  # compute final accuracy
+        # Accumulate partial derivatives of loss wrt paramters
+        loss.backward()
+
+        # Step in opposite direction of the gradient
+        optimizer.step()
+
+        # Clean the gradients mmmh dirty gradients
+        optimizer.zero_grad()
+
+        # Assign 0 (not TF) or 1 (TF) to output prob
+        y_hat_class = np.where(y_hat.detach().numpy() < 0.5, 0, 1)
+
+        # Compute accuracy
+        accuracy = np.sum(Y_train.detach().numpy() == y_hat_class) / len(Y_train)
 
         train_accuracy.append(accuracy)
         train_loss.append(loss.item())
