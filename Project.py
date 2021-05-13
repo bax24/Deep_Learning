@@ -8,6 +8,10 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 
 
+# -------------------------------------
+# Load the Proteins from the data file
+# Returns : an Array of TF and not TF
+# -------------------------------------
 def load_data():
     # Load Transformation factors
     TF = pd.read_csv("data/TF_seqs.csv", header=None)
@@ -32,7 +36,11 @@ def load_data():
     return pd.concat([TF, Not_TF])
 
 
-def get_training(data):
+# -----------------------------------------------
+# Convert each letter in sequence to ascii number
+# Returns : A converted X training array and Y array
+# -----------------------------------------------
+def get_ascii(data):
     train_tensor = torch.zeros(len(data), data[1].str.len().max())
     for i in range(len(data)):
         for j in range(len(data.iloc[i, 1])):
@@ -42,11 +50,18 @@ def get_training(data):
     return train_tensor, torch.FloatTensor(data[2]).reshape(-1, 1)
 
 
+# -------------------------------------------------
+# Split the data of proteins to have TF and non TF
+# Returns : a training set X
+# -------------------------------------------------
 def split_data(data, n):
     train = pd.concat([data[:n / 2], data[-n / 2:]], ignore_index=True)
     return train
 
 
+# -------------------------------------
+# Generic class of Neural Net
+# -------------------------------------
 class NeuralNet(nn.Module):
     def __init__(self, in_size, hidden_units, out_size):
         super(NeuralNet, self).__init__()
@@ -61,10 +76,17 @@ class NeuralNet(nn.Module):
         return out
 
 
+# -------------------------------------
+# Defines the Loss function
+# -------------------------------------
 def loss_func(y_hat, y):
     return nn.BCELoss()(y_hat, y)
 
 
+# ------------------------------------------------------
+# Compute the frequencies of each amino acid in sequence
+# Returns : Array of N by 22 training samples and output array
+# ------------------------------------------------------
 def get_freq(df):
     df = split
     amino_acids = ['A', 'R', 'N', 'D', 'B', 'C', 'E', 'Q', 'Z', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W',
