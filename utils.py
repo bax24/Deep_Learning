@@ -92,3 +92,26 @@ def get_amino_acids_dic():
         dic[aa] = idx
     return dic
 
+# -------------------------------------------------
+# Encode the sequences as a list of integers (based on the amino acids dict)
+# Return the modified DataFrame
+# -------------------------------------------------
+def encode_proteins(proteins):
+    amino_acids_dic = utils.get_amino_acids_dic()
+    sequences = proteins[1].tolist()
+    encoded_sequences = []
+    #encoding all the sequences
+    for seq in sequences:
+        encoded_seq = []
+
+        for char in seq:
+            if char == 'U':
+                encoded_seq.append(amino_acids_dic['C'])
+            else:
+                encoded_seq.append(amino_acids_dic[char])
+
+        encoded_sequences.append(encoded_seq)
+
+    data = {"Label" : proteins[0], "Sequence" : encoded_sequences, "TF" : proteins[2]}
+    return pd.DataFrame(data)
+
