@@ -1,6 +1,11 @@
 import pandas as pd
 import numpy as np
 import torch
+
+
+amino_acids = ['A', 'R', 'N', 'D', 'B', 'C', 'E', 'Q', 'Z', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W',
+                   'Y', 'V', '*']
+
 # -------------------------------------
 # Load the Proteins from the data file
 # Returns : an Array of TF and not TF
@@ -51,3 +56,29 @@ def split_data(data, n):
     part = int(n/2)
     train = pd.concat([data[:part], data[-part:]], ignore_index=True)
     return train
+
+# -------------------------------------------------
+# Binarize an int number on a specified (or not) amount of bits
+# Return : The binarized version
+# -------------------------------------------------
+def binarize(v, nb=0):
+    if nb == 0:
+        return bin(v)[2:]
+    else:
+        return np.binary_repr(v, width=nb)
+
+# -------------------------------------------------
+# Throw the user a yes or no question
+# Return True if yes, False if no
+# -------------------------------------------------
+def yes_or_no_question(question, default_no=True):
+    choices = ' [y/N]: ' if default_no else ' [Y/n]: '
+    default_answer = 'n' if default_no else 'y'
+    reply = str(input(question + choices)).lower().strip() or default_answer
+    if reply[0] == 'y':
+        return True
+    if reply[0] == 'n':
+        return False
+    else:
+        return False if default_no else True
+
