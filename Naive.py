@@ -54,7 +54,7 @@ def get_freq(df):
 
 if __name__ == '__main__':
     # Debug
-    disp = False
+    disp = True
 
     # Device configuration
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')

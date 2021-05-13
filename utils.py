@@ -82,3 +82,13 @@ def yes_or_no_question(question, default_no=True):
     else:
         return False if default_no else True
 
+# -------------------------------------------------
+# Get a dictionary of the encoded amino acids
+# Return the dictionary
+# -------------------------------------------------
+def get_amino_acids_dic():
+    dic = {}
+    for idx,aa in enumerate(amino_acids):
+        dic[aa] = idx
+    return dic
+
