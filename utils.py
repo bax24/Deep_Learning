@@ -86,9 +86,14 @@ def yes_or_no_question(question, default_no=True):
 # Get a dictionary of the encoded amino acids
 # Return the dictionary
 # -------------------------------------------------
-def get_amino_acids_dic():
+def get_amino_acids_dic(padding=True):
     dic = {}
-    for idx,aa in enumerate(amino_acids):
+    aa_list = amino_acids
+
+    if padding:
+        aa_list.insert(0, ' ')
+
+    for idx,aa in enumerate(aa_list):
         dic[aa] = idx
     return dic
 
@@ -96,15 +101,26 @@ def get_amino_acids_dic():
 # Encode the sequences as a list of integers (based on the amino acids dict)
 # Return the modified DataFrame
 # -------------------------------------------------
-def encode_proteins(proteins):
-    amino_acids_dic = utils.get_amino_acids_dic()
+def encode_proteins(proteins, padding=True):
+    amino_acids_dic = get_amino_acids_dic(padding)
     sequences = proteins[1].tolist()
+
+    maxlen = len(max(sequences, key=len))
+
+
     encoded_sequences = []
-    #encoding all the sequences
+    # encoding all the sequences
     for seq in sequences:
         encoded_seq = []
 
+        # Padding the sequences with white spaces
+        if padding:
+            while len(seq) < maxlen:
+                seq += ' '
+
         for char in seq:
+
+            # U has the same function as C
             if char == 'U':
                 encoded_seq.append(amino_acids_dic['C'])
             else:
