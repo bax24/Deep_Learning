@@ -186,5 +186,4 @@ def encode_proteins(proteins, padding=True):
 
     data = {"Label" : proteins["id"], "Sequence" : encoded_sequences, "TF" : proteins["isTf"]}
     df = pd.DataFrame(data)
-    df.to_csv(path_or_buf="data/EncodedDataset.csv", index=False)
     return df

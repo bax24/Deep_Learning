@@ -60,17 +60,12 @@ if __name__ == '__main__':
     # Device configuration
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-
-    if utils.yes_or_no_question("Encode proteins ?", default_no=False):
-        print("Encoding the proteins ...")
-        start = time.time()
-        # Loading the data
-        proteins = utils.encode_proteins(pd.read_csv("data/BinaryDataset.csv"))
-        end = time.time()
-        print("Done in {} seconds !\n".format(int(end - start)))
-    else:
-        proteins = pd.read_csv("data/EncodedDataset.csv")
-
+    print("Encoding the proteins ...")
+    start = time.time()
+    # Loading the data
+    proteins = utils.encode_proteins(pd.read_csv("data/BinaryDataset.csv"))
+    end = time.time()
+    print("Done in {} seconds !\n".format(int(end - start)))
 
     print("Formatting LS and TS ...")
     start = time.time()
