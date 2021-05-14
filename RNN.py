@@ -45,17 +45,6 @@ class MyRNN(nn.Module):
 def loss_func(y_hat, y):
     return nn.BCELoss()(y_hat, y)
 
-
-def one_hot_encode(sequence, dict_size, seq_len, batch_size):
-    # Creating a multi-dimensional array of zeros with the desired output shape
-    features = np.zeros((batch_size, seq_len, dict_size), dtype=np.float32)
-
-    # Replacing the 0 at the relevant character index with a 1 to represent that character
-    for i in range(batch_size):
-        for u in range(seq_len):
-            features[i, u, sequence[i][u]] = 1
-    return features
-
 if __name__ == '__main__':
     # Device configuration
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -82,7 +71,7 @@ if __name__ == '__main__':
     print("Done in {} seconds !\n".format(int(end - start)))
 
     # Hyper-parameters
-    input_size = int(x_test.shape[1])
+    input_size = 1
     output_size = 1
     hidden_size = 10
     learning_rate = 0.01
@@ -94,6 +83,7 @@ if __name__ == '__main__':
     my_rnn.to(device)
 
     # Defining the optimizer
+    criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(my_rnn.parameters(), lr=learning_rate)
 
 
@@ -109,7 +99,8 @@ if __name__ == '__main__':
         output = output.to(device)
 
         y_train = y_train.to(device)
-        loss = loss_func(output, y_train)
+        #https://discuss.pytorch.org/t/valueerror-expected-input-batch-size-324-to-match-target-batch-size-4/24498/3
+        loss = criterion(output, y_train)
         # Does backpropagation and calculates gradients
         loss.backward()
         # Updates the weights accordingly
@@ -168,7 +159,7 @@ if __name__ == '__main__':
     seq_len = maxlen - 1
     batch_size = len(text)
 
-    input_seq = one_hot_encode(input_seq, dict_size, seq_len, batch_size)
+    input_seq = utils.one_hot_encode(input_seq, dict_size, seq_len, batch_size)
     print("Input shape: {} --> (Batch Size, Sequence Length, One-Hot Encoding Size)".format(input_seq.shape))
 
     input_seq = torch.from_numpy(input_seq)

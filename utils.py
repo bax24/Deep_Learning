@@ -153,6 +153,19 @@ def get_amino_acids_dic(padding=True):
     return dic
 
 # -------------------------------------------------
+#
+# -------------------------------------------------
+def one_hot_encode(sequence, dict_size, seq_len, batch_size):
+    # Creating a multi-dimensional array of zeros with the desired output shape
+    features = np.zeros((batch_size, seq_len, dict_size), dtype=np.float32)
+
+    # Replacing the 0 at the relevant character index with a 1 to represent that character
+    for i in range(batch_size):
+        for u in range(seq_len):
+            features[i, u, sequence[i][u]] = 1
+    return features
+
+# -------------------------------------------------
 # Encode the sequences as a list of integers (based on the amino acids dict)
 # Return the modified DataFrame
 # -------------------------------------------------
