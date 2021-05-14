@@ -129,5 +129,5 @@ def encode_proteins(proteins, padding=True):
         encoded_sequences.append(encoded_seq)
 
     data = {"Label" : proteins[0], "Sequence" : encoded_sequences, "TF" : proteins[2]}
-    return pd.DataFrame(data)
+    return pd.DataFrame(data), maxlen
 
