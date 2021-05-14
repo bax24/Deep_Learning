@@ -122,9 +122,10 @@ def encode_proteins(proteins, padding=True):
 
             # U has the same function as C
             if char == 'U':
-                encoded_seq.append(amino_acids_dic['C'])
+                # We append lists because we will could change the encoding to a hot one code for instance
+                encoded_seq.append([amino_acids_dic['C']])
             else:
-                encoded_seq.append(amino_acids_dic[char])
+                encoded_seq.append([amino_acids_dic[char]])
 
         encoded_sequences.append(encoded_seq)
 

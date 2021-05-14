@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import utils
 import pandas as pd
+import time
 from sklearn.model_selection import train_test_split
 
 class MyRNN(nn.Module):
@@ -43,16 +44,19 @@ class MyRNN(nn.Module):
 def loss_func(y_hat, y):
     return nn.BCELoss()(y_hat, y)
 
-
-
 if __name__ == '__main__':
     # Device configuration
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+    print("Encoding the proteins ...")
+    start = time.time()
     # Loading the data
     proteins, maxlen = utils.encode_proteins(utils.load_data())
-    #print(proteins)
+    end = time.time()
+    print("Done in {} seconds !\n".format(int(end - start)))
 
+    print("Formatting LS and TS ...")
+    start = time.time()
     # Getting the LS and TS in the appropriate tensor format.
     train, test = train_test_split(proteins, test_size=0.3)
 
@@ -60,19 +64,48 @@ if __name__ == '__main__':
     y_train = torch.FloatTensor(train["TF"].tolist()).reshape(-1, 1)
     x_test = torch.Tensor(test["Sequence"].tolist())
     y_test = torch.FloatTensor(test["TF"].tolist()).reshape(-1, 1)
+    end = time.time()
+    print("LS shape :\n \tInput : {}\n \tOutput : {}".format(x_train.shape, y_train.shape))
+    print("TS shape :\n \tInput : {}\n \tOutput : {}".format(x_test.shape, y_test.shape))
+    print("Done in {} seconds !\n".format(int(end - start)))
 
     # Hyper-parameters
     input_size = maxlen
-    # binary classification at first
     output_size = 1
     hidden_size = 10
     learning_rate = 0.01
     epochs = 1000
 
     # Instantiate the model with hyperparameters
-    my_rnn = MyRNN(input_size=input_size, output_size=output_size, hidden_units=hidden_size, n_layers=1)
+    my_rnn = MyRNN(input_size=input_size, output_size=output_size, hidden_dim=hidden_size, n_layers=1)
     # We'll also set the model to the device that we defined earlier (default is CPU)
     my_rnn.to(device)
 
     # Defining the optimizer
     optimizer = optim.Adam(my_rnn.parameters(), lr=learning_rate)
+
+    # Training Run
+    print("Training the model ...")
+    start = time.time()
+    x_train = x_train.to(device)
+    for epoch in range(1, epochs + 1):
+        # Clears existing gradients from previous epoch
+        optimizer.zero_grad()
+
+        output = my_rnn(x_train)
+        output = output.to(device)
+
+        y_train = y_train.to(device)
+        loss = loss_func(output, y_train)
+        # Does backpropagation and calculates gradients
+        loss.backward()
+        # Updates the weights accordingly
+        optimizer.step()
+
+        if epoch % 10 == 0:
+            print('Epoch: {}/{}.............'.format(epoch, epochs), end=' ')
+            print("Loss: {:.4f}".format(loss.item()))
+
+    end = time.time()
+    print("Done in {} seconds !\n".format(int(end - start)))
+
