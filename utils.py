@@ -4,6 +4,9 @@ import torch
 import csv
 
 
+amino_acids = ['A', 'R', 'N', 'D', 'B', 'C', 'E', 'Q', 'Z', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S', 'T', 'W',
+                   'Y', 'V', '*']
+
 # -------------------------------------
 # Load the Proteins from the data file
 # Returns : an Array of TF and not TF
@@ -108,7 +111,6 @@ def split_data(data, n):
     part = int(n / 2)
     train = pd.concat([data[:part], data[-part:]], ignore_index=True)
     return train
-<<<<<<< HEAD
 
 # -------------------------------------------------
 # Binarize an int number on a specified (or not) amount of bits
@@ -156,7 +158,7 @@ def get_amino_acids_dic(padding=True):
 # -------------------------------------------------
 def encode_proteins(proteins, padding=True):
     amino_acids_dic = get_amino_acids_dic(padding)
-    sequences = proteins[1].tolist()
+    sequences = proteins["seq"].tolist()
 
     maxlen = len(max(sequences, key=len))
 
@@ -182,8 +184,7 @@ def encode_proteins(proteins, padding=True):
 
         encoded_sequences.append(encoded_seq)
 
-    data = {"Label" : proteins[0], "Sequence" : encoded_sequences, "TF" : proteins[2]}
-    return pd.DataFrame(data), maxlen
-
-=======
->>>>>>> a7246be32100ac850d33331a937ff18f8411f77c
+    data = {"Label" : proteins["id"], "Sequence" : encoded_sequences, "TF" : proteins["isTf"]}
+    df = pd.DataFrame(data)
+    df.to_csv(path_or_buf="data/EncodedDataset.csv", index=False)
+    return df
