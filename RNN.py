@@ -37,6 +37,7 @@ class MyRNN(nn.Module):
         out = out[:, -1, :]
         out = self.fc(out)
 
+        # Softmax for classification (in order to have 0 to 1 values -> BCE)
         return F.softmax(out, dim=0)
 
 
@@ -53,7 +54,7 @@ if __name__ == '__main__':
     print("Encoding the proteins ...")
     start = time.time()
     # Loading the data
-    proteins = utils.encode_proteins(pd.read_csv("data/BinaryDataset.csv"))
+    proteins = utils.encode_proteins(pd.read_csv("data/LightDataset.csv"))
     end = time.time()
     print("Done in {} seconds !\n".format(int(end - start)))
 
@@ -66,6 +67,7 @@ if __name__ == '__main__':
     y_train = torch.FloatTensor(train["TF"].tolist()).reshape(-1, 1)
     x_test = torch.Tensor(test["Sequence"].tolist())
     y_test = torch.FloatTensor(test["TF"].tolist()).reshape(-1, 1)
+
     end = time.time()
     print("LS shape :\n \tInput : {}\n \tOutput : {}".format(x_train.shape, y_train.shape))
     print("TS shape :\n \tInput : {}\n \tOutput : {}".format(x_test.shape, y_test.shape))
@@ -76,9 +78,9 @@ if __name__ == '__main__':
     output_size = 1
     hidden_size = 10
     learning_rate = 0.01
-    epochs = 50
+    epochs = 10
 
-    # Instantiate the model with hyperparameters
+    # Instantiate the model with hyper-parameters
     my_rnn = MyRNN(input_size=input_size, output_size=output_size, hidden_dim=hidden_size, n_layers=1)
     # We'll also set the model to the device that we defined earlier (default is CPU)
     my_rnn.to(device)
@@ -100,20 +102,7 @@ if __name__ == '__main__':
         output = output.to(device)
 
         y_train = y_train.to(device)
-        # print("output shape : {}\n y_train shape : {}".format(output.shape, y_train.shape))
-
-        # RuntimeError: all elements of input should be between 0 and 1
-        # c'est chelou pcq on est pas sensé avoir de valeur pas entre 0 et 1
-        try:
-            loss = loss_func(output, y_train)
-        except RuntimeError:
-            print("EPOCH {} \nRuntimeError: all elements of input should be between 0 and 1".format(epoch))
-            for i in range(int(output.shape[0])):
-                op = output[i, 0]
-                if not op >= 0 and op <= 1:
-                    # print("Output[{}] = {}".format(i, op))
-                    break
-
+        loss = loss_func(output, y_train)
         # Does backpropagation and calculates gradients
         loss.backward()
         # Updates the weights accordingly
@@ -125,3 +114,15 @@ if __name__ == '__main__':
 
     end = time.time()
     print("Done in {} seconds !\n".format(int(end - start)))
+
+# Test the model
+# In test phase, we don't need to compute gradients (for memory efficiency)
+print("Testing the trained model ...")
+start = time.time()
+with torch.no_grad():
+    test_output = my_rnn(x_test)
+    # Comparer test_output aux bonnes valeurs ...
+    # Problème : test_output[i] = x pour tout i ...
+
+end = time.time()
+print("Done in {} seconds !\n".format(int(end - start)))
