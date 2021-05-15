@@ -115,14 +115,14 @@ if __name__ == '__main__':
     end = time.time()
     print("Done in {} seconds !\n".format(int(end - start)))
 
-# Test the model
-# In test phase, we don't need to compute gradients (for memory efficiency)
-print("Testing the trained model ...")
-start = time.time()
-with torch.no_grad():
-    test_output = my_rnn(x_test)
-    # Comparer test_output aux bonnes valeurs ...
-    # Problème : test_output[i] = x pour tout i ...
+    # Test the model
+    # In test phase, we don't need to compute gradients (for memory efficiency)
+    print("Testing the trained model ...")
+    start = time.time()
+    with torch.no_grad():
+        test_output = my_rnn(x_test)
+        # Comparer test_output aux bonnes valeurs ...
+        # Problème : test_output[i] = x pour tout i ...
 
-end = time.time()
-print("Done in {} seconds !\n".format(int(end - start)))
+    end = time.time()
+    print("Done in {} seconds !\n".format(int(end - start)))
