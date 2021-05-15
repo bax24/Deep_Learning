@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import torch.nn.functional as F
 import utils
 import pandas as pd
 import numpy as np
@@ -36,7 +37,7 @@ class MyRNN(nn.Module):
         out = out[:, -1, :]
         out = self.fc(out)
 
-        return out
+        return F.softmax(out, dim=0)
 
 
 # -------------------------------------
@@ -103,7 +104,15 @@ if __name__ == '__main__':
 
         # RuntimeError: all elements of input should be between 0 and 1
         # c'est chelou pcq on est pas sensé avoir de valeur pas entre 0 et 1
-        loss = loss_func(output, y_train)
+        try:
+            loss = loss_func(output, y_train)
+        except RuntimeError:
+            print("EPOCH {} \nRuntimeError: all elements of input should be between 0 and 1".format(epoch))
+            for i in range(int(output.shape[0])):
+                op = output[i, 0]
+                if not op >= 0 and op <= 1:
+                    # print("Output[{}] = {}".format(i, op))
+                    break
 
         # Does backpropagation and calculates gradients
         loss.backward()
