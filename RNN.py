@@ -75,7 +75,7 @@ if __name__ == '__main__':
     output_size = 1
     hidden_size = 10
     learning_rate = 0.01
-    epochs = 1000
+    epochs = 50
 
     # Instantiate the model with hyperparameters
     my_rnn = MyRNN(input_size=input_size, output_size=output_size, hidden_dim=hidden_size, n_layers=1)
@@ -100,7 +100,11 @@ if __name__ == '__main__':
 
         y_train = y_train.to(device)
         # print("output shape : {}\n y_train shape : {}".format(output.shape, y_train.shape))
+
+        # RuntimeError: all elements of input should be between 0 and 1
+        # c'est chelou pcq on est pas sensé avoir de valeur pas entre 0 et 1
         loss = loss_func(output, y_train)
+
         # Does backpropagation and calculates gradients
         loss.backward()
         # Updates the weights accordingly
@@ -112,85 +116,3 @@ if __name__ == '__main__':
 
     end = time.time()
     print("Done in {} seconds !\n".format(int(end - start)))
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # ------------------------------------------------------------------------------------------------------------------
-    # ------------------------------------------------------------------------------------------------------------------
-
-    text = ['hey how are you', 'good i am fine', 'have a nice day']
-
-    # Join all the sentences together and extract the unique characters from the combined sentences
-    chars = set(''.join(text))
-
-    # Creating a dictionary that maps integers to the characters
-    int2char = dict(enumerate(chars))
-
-    # Creating another dictionary that maps characters to integers
-    char2int = {char: ind for ind, char in int2char.items()}
-
-    maxlen = len(max(text, key=len))
-    print("The longest string has {} characters".format(maxlen))
-
-    # Padding
-
-    # A simple loop that loops through the list of sentences and adds a ' ' whitespace until the length of the sentence matches
-    # the length of the longest sentence
-    for i in range(len(text)):
-        while len(text[i]) < maxlen:
-            text[i] += ' '
-
-    # Creating lists that will hold our input and target sequences
-    input_seq = []
-    target_seq = []
-
-    for i in range(len(text)):
-        # Remove last character for input sequence
-        input_seq.append(text[i][:-1])
-
-        # Remove firsts character for target sequence
-        target_seq.append(text[i][1:])
-        print("Input Sequence: {}\nTarget Sequence: {}".format(input_seq[i], target_seq[i]))
-
-    for i in range(len(text)):
-        input_seq[i] = [char2int[character] for character in input_seq[i]]
-        target_seq[i] = [char2int[character] for character in target_seq[i]]
-
-    dict_size = len(char2int)
-    seq_len = maxlen - 1
-    batch_size = len(text)
-
-    input_seq = utils.one_hot_encode(input_seq, dict_size, seq_len, batch_size)
-    print("Input shape: {} --> (Batch Size, Sequence Length, One-Hot Encoding Size)".format(input_seq.shape))
-
-    input_seq = torch.from_numpy(input_seq)
-    target_seq = torch.Tensor(target_seq)
-
-    # Instantiate the model with hyperparameters
-    model = MyRNN(input_size=dict_size, output_size=dict_size, hidden_dim=12, n_layers=1)
-    # We'll also set the model to the device that we defined earlier (default is CPU)
-    model = model.to(device)
-
-    # Define hyperparameters
-    n_epochs = 100
-    lr = 0.01
-
-    # Define Loss, Optimizer
-    criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-
-    # Training Run
-    input_seq = input_seq.to(device)
-    for epoch in range(1, n_epochs + 1):
-        optimizer.zero_grad()  # Clears existing gradients from previous epoch
-        # input_seq = input_seq.to(device)
-        output = model(input_seq)
-        output = output.to(device)
-        target_seq = target_seq.to(device)
-        loss = criterion(output, target_seq.view(-1).long())
-        loss.backward()  # Does backpropagation and calculates gradients
-        optimizer.step()  # Updates the weights accordingly
-
-        if epoch % 10 == 0:
-            print('Epoch: {}/{}.............'.format(epoch, n_epochs), end=' ')
-            print("Loss: {:.4f}".format(loss.item()))
-
