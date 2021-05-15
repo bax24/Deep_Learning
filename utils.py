@@ -200,3 +200,8 @@ def encode_proteins(proteins, padding=True):
     data = {"Label" : proteins["id"], "Sequence" : encoded_sequences, "TF" : proteins["isTf"]}
     df = pd.DataFrame(data)
     return df
+
+def light_data():
+    data = pd.read_csv("data/BinaryDataset.csv")
+    data = data.sample(frac=0.2).reset_index(drop=True)
+    data.to_csv(r'data/LightDataset.csv', index=False)
