@@ -33,7 +33,7 @@ class MyRNN(nn.Module):
         out, hidden = self.rnn(x, hidden)
 
         # Reshaping the outputs such that it can be fit into the fully connected layer
-        out = out.contiguous().view(-1, self.hidden_dim)
+        out = out[:, -1, :]
         out = self.fc(out)
 
         return out
@@ -99,8 +99,8 @@ if __name__ == '__main__':
         output = output.to(device)
 
         y_train = y_train.to(device)
-        #https://discuss.pytorch.org/t/valueerror-expected-input-batch-size-324-to-match-target-batch-size-4/24498/3
-        loss = criterion(output, y_train)
+        # print("output shape : {}\n y_train shape : {}".format(output.shape, y_train.shape))
+        loss = loss_func(output, y_train)
         # Does backpropagation and calculates gradients
         loss.backward()
         # Updates the weights accordingly
