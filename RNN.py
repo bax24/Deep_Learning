@@ -8,6 +8,7 @@ import numpy as np
 import time
 from sklearn.model_selection import train_test_split
 
+
 class MyRNN(nn.Module):
     def __init__(self, input_size, output_size, hidden_dim, n_layers):
         super(MyRNN, self).__init__()
@@ -18,7 +19,7 @@ class MyRNN(nn.Module):
         # Number of hidden layers
         self.n_layers = n_layers
 
-        #RNN layer
+        # RNN layer
         self.rnn = nn.RNN(input_size, hidden_dim, n_layers, batch_first=True)
 
         # Readout layer
@@ -38,7 +39,7 @@ class MyRNN(nn.Module):
         out = self.fc(out)
 
         # Softmax for classification (in order to have 0 to 1 values -> BCE)
-        return F.softmax(out, dim=0)
+        return torch.sigmoid(out)
 
 
 # -------------------------------------
@@ -46,6 +47,7 @@ class MyRNN(nn.Module):
 # -------------------------------------
 def loss_func(y_hat, y):
     return nn.BCELoss()(y_hat, y)
+
 
 if __name__ == '__main__':
     # Device configuration
@@ -76,9 +78,9 @@ if __name__ == '__main__':
     # Hyper-parameters
     input_size = 1
     output_size = 1
-    hidden_size = 10
+    hidden_size = 250
     learning_rate = 0.01
-    epochs = 10
+    epochs = 20
 
     # Instantiate the model with hyper-parameters
     my_rnn = MyRNN(input_size=input_size, output_size=output_size, hidden_dim=hidden_size, n_layers=1)
@@ -89,26 +91,30 @@ if __name__ == '__main__':
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(my_rnn.parameters(), lr=learning_rate)
 
-
     # Training Run
     print("Training the model ...")
     start = time.time()
     x_train = x_train.to(device)
     for epoch in range(1, epochs + 1):
-        # Clears existing gradients from previous epoch
-        optimizer.zero_grad()
+
+        # Not to get stuck in a minima
+        # idx = torch.randperm(x_train.shape[0])
+        # x_train = x_train[idx].view(x_train.size())
 
         output = my_rnn(x_train)
         output = output.to(device)
 
         y_train = y_train.to(device)
         loss = loss_func(output, y_train)
+
+        # Clears existing gradients from previous epoch
+        optimizer.zero_grad()
         # Does backpropagation and calculates gradients
         loss.backward()
         # Updates the weights accordingly
         optimizer.step()
 
-        if epoch % 10 == 0:
+        if epoch % 1 == 0:
             print('Epoch: {}/{}.............'.format(epoch, epochs), end=' ')
             print("Loss: {:.4f}".format(loss.item()))
 
@@ -119,10 +125,12 @@ if __name__ == '__main__':
     # In test phase, we don't need to compute gradients (for memory efficiency)
     print("Testing the trained model ...")
     start = time.time()
+    print("Testing the model ...")
+    start = time.time()
     with torch.no_grad():
         test_output = my_rnn(x_test)
-        # Comparer test_output aux bonnes valeurs ...
-        # Problème : test_output[i] = x pour tout i ...
-
+        y_hat_test_class = np.where(test_output.detach().numpy() < 0.5, 0, 1)
+        accuracy_test = np.sum(y_test.detach().numpy() == y_hat_test_class) / len(y_test)
+        print("Accuracy = {}".format(accuracy_test))
     end = time.time()
     print("Done in {} seconds !\n".format(int(end - start)))
