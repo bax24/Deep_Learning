@@ -1,15 +1,18 @@
-# Deep_Learning
+# INFO8010-1
+# Deep Learning
 
-Overleaf : https://www.overleaf.com/1591643782dmmfhbwtgnkd
+The goal of this project is to recognize transcription factor from proteic sequences. 
+It has been made as part of our *[Deep Learning](https://www.programmes.uliege.be/cocoon/20202021/en/cours/INFO8010-1.html)* 
+course which is given by **Gilles Louppe** at [University of Liège](https://www.uliege.be/).
 
-Check list :
+## Content
+* The data folder contains the processed raw data in several .csv files.
+* The utils.py file contains all the necessary functions that will be used by our models.
+* Naive.py contains the implementation of the basic NN which uses the amino-acids frequencies.
+* RNN.py contains the implementation of the RNNs.
 
-- Tenter CNN voir articles imprimés
-- tenter RNN pcq architecture typique pour séquences texte
-- Tenter transformers apparemment c'est + stylé
-- Classifier par famille pcq binaire class caca 
-- rajouter testing loop avec classic 70/30 train-test method 
+## Contact
 
-
-MOINS IMPORTANT
-- Arriver à lire les figures sur overleaf
+* **Lucas Backes** - [contact](lucas.backes@student.uliege.be)
+* **Ludo Bissot** - [contact](ludo.bissot@student.uliege.be)
+* **Martin Laurent** - [contact](martin.laurent@student.uliege.be)

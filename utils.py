@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import torch
+import random
 import string
 import csv
 
@@ -207,5 +208,29 @@ def light_data():
     data = data.sample(frac=0.75).reset_index(drop=True)
     data.to_csv(r'data/LightDataset.csv', index=False)
 
-if __name__ == '__main__':
-    light_data()
+
+def sequence_proteins(proteins, seq_size, n_sample_per_protein, rand=True):
+    amino_acids_dic = get_amino_acids_dic(padding=False)
+    sequences = proteins["seq"].tolist()
+    tf = proteins["isTf"].tolist()
+    id = proteins["id"].tolist()
+
+    new_sequences = []
+    new_tf = []
+    new_id = []
+
+    for idx, seq in enumerate(sequences):
+        n_div = int(len(seq) / seq_size)
+
+        for i in range(n_sample_per_protein):
+            if n_div > 1:
+                if rand:
+                    start = random.randint(0, len(seq) - seq_size - 1)
+                else:
+                    start = 0
+                new_sequences.append(seq[start:start + seq_size])
+                new_tf.append(tf[idx])
+                new_id.append(id[idx])
+
+    data = {"id": new_id, "seq": new_sequences, "isTf": new_tf}
+    return pd.DataFrame(data)

@@ -46,7 +46,7 @@ class MyRNN(nn.Module):
 
         # LSTM
         c0 = torch.zeros(self.n_layers, x.size(0), self.hidden_dim).to(device)
-        out, hidden = self.lstm(x, (hidden,c0))
+        out, hidden = self.lstm(x, (hidden, c0))
 
         # GRU
         # out, hidden = self.gru(x, hidden)
@@ -68,10 +68,18 @@ def loss_func(y_hat, y):
 
 if __name__ == '__main__':
 
+    light_dataset = pd.read_csv("data/BinaryDataset.csv")
+
+    print("Sequencing the proteins ...")
+    start = time.time()
+    light_dataset = utils.sequence_proteins(light_dataset, 100, 1, rand=True)
+    end = time.time()
+    print("Done in {} seconds !\n".format(int(end - start)))
+
     print("Encoding the proteins ...")
     start = time.time()
     # Loading the data
-    proteins = utils.encode_proteins(pd.read_csv("data/LightDataset.csv"))
+    proteins = utils.encode_proteins(light_dataset, padding=False)
     end = time.time()
     print("Done in {} seconds !\n".format(int(end - start)))
 
@@ -93,9 +101,9 @@ if __name__ == '__main__':
     # Hyper-parameters
     input_size = 1
     output_size = 1
-    hidden_size = 25
-    learning_rate = 0.005
-    epochs = 20
+    hidden_size = 50
+    learning_rate = 0.0001
+    epochs = 1000
 
     # Instantiate the model with hyper-parameters
     my_rnn = MyRNN(input_size=input_size, output_size=output_size, hidden_dim=hidden_size, n_layers=1)
