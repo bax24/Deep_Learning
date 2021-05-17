@@ -24,10 +24,10 @@ class MyRNN(nn.Module):
         self.n_layers = n_layers
 
         # RNN layer
-        self.rnn = nn.RNN(input_size, hidden_dim, n_layers, batch_first=True)
+        # self.rnn = nn.RNN(input_size, hidden_dim, n_layers, batch_first=True)
 
         # LSTM layer
-        # self.lstm = nn.LSTM(input_size, hidden_dim, n_layers, batch_first=True)
+        self.lstm = nn.LSTM(input_size, hidden_dim, n_layers, batch_first=True)
 
         # GRU layer
         # self.gru = nn.GRU(input_size, hidden_dim, n_layers, batch_first=True)
@@ -42,11 +42,11 @@ class MyRNN(nn.Module):
         hidden = torch.zeros(self.n_layers, batch_size, self.hidden_dim).to(device)
 
         # RNN
-        out, hidden = self.rnn(x, hidden)
+        # out, hidden = self.rnn(x, hidden)
 
         # LSTM
-        # c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
-        # out, hidden = self.lstm(x, (hidden,c0))
+        c0 = torch.zeros(self.n_layers, x.size(0), self.hidden_dim).to(device)
+        out, hidden = self.lstm(x, (hidden,c0))
 
         # GRU
         # out, hidden = self.gru(x, hidden)
@@ -93,9 +93,9 @@ if __name__ == '__main__':
     # Hyper-parameters
     input_size = 1
     output_size = 1
-    hidden_size = 27
-    learning_rate = 0.001
-    epochs = 50
+    hidden_size = 25
+    learning_rate = 0.005
+    epochs = 20
 
     # Instantiate the model with hyper-parameters
     my_rnn = MyRNN(input_size=input_size, output_size=output_size, hidden_dim=hidden_size, n_layers=1)
