@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torch.nn.functional as F
 import utils
 import pandas as pd
 import numpy as np
@@ -9,6 +8,11 @@ import time
 from sklearn.model_selection import train_test_split
 
 
+# Device configuration
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+
+# RNN model (pick between simple, LSTM or GRU)
 class MyRNN(nn.Module):
     def __init__(self, input_size, output_size, hidden_dim, n_layers):
         super(MyRNN, self).__init__()
@@ -22,6 +26,12 @@ class MyRNN(nn.Module):
         # RNN layer
         self.rnn = nn.RNN(input_size, hidden_dim, n_layers, batch_first=True)
 
+        # LSTM layer
+        # self.lstm = nn.LSTM(input_size, hidden_dim, n_layers, batch_first=True)
+
+        # GRU layer
+        # self.gru = nn.GRU(input_size, hidden_dim, n_layers, batch_first=True)
+
         # Readout layer
         self.fc = nn.Linear(hidden_dim, output_size)
 
@@ -31,14 +41,21 @@ class MyRNN(nn.Module):
         # Initializing hidden state for first input
         hidden = torch.zeros(self.n_layers, batch_size, self.hidden_dim).to(device)
 
-        # Passing in the input and hidden state into the model and obtaining outputs
+        # RNN
         out, hidden = self.rnn(x, hidden)
+
+        # LSTM
+        # c0 = torch.zeros(self.num_layers, x.size(0), self.hidden_size).to(device)
+        # out, hidden = self.lstm(x, (hidden,c0))
+
+        # GRU
+        # out, hidden = self.gru(x, hidden)
 
         # Reshaping the outputs such that it can be fit into the fully connected layer
         out = out[:, -1, :]
         out = self.fc(out)
 
-        # Softmax for classification (in order to have 0 to 1 values -> BCE)
+        # Sigmoid for binary classification (in order to have 0 to 1 values -> BCE)
         return torch.sigmoid(out)
 
 
@@ -50,8 +67,6 @@ def loss_func(y_hat, y):
 
 
 if __name__ == '__main__':
-    # Device configuration
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     print("Encoding the proteins ...")
     start = time.time()
@@ -78,9 +93,9 @@ if __name__ == '__main__':
     # Hyper-parameters
     input_size = 1
     output_size = 1
-    hidden_size = 250
-    learning_rate = 0.01
-    epochs = 20
+    hidden_size = 27
+    learning_rate = 0.001
+    epochs = 50
 
     # Instantiate the model with hyper-parameters
     my_rnn = MyRNN(input_size=input_size, output_size=output_size, hidden_dim=hidden_size, n_layers=1)
@@ -124,8 +139,6 @@ if __name__ == '__main__':
     # Test the model
     # In test phase, we don't need to compute gradients (for memory efficiency)
     print("Testing the trained model ...")
-    start = time.time()
-    print("Testing the model ...")
     start = time.time()
     with torch.no_grad():
         test_output = my_rnn(x_test)

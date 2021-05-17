@@ -204,5 +204,8 @@ def encode_proteins(proteins, padding=True):
 
 def light_data():
     data = pd.read_csv("data/BinaryDataset.csv")
-    data = data.sample(frac=0.2).reset_index(drop=True)
+    data = data.sample(frac=0.75).reset_index(drop=True)
     data.to_csv(r'data/LightDataset.csv', index=False)
+
+if __name__ == '__main__':
+    light_data()
